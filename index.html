@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeFlow — Project Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="auth-logo">◈</span>
+      <span>CodeFlow</span>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Sign In</button>
+      <button class="auth-tab" data-tab="register">Register</button>
+    </div>
+    <div class="auth-form" id="formLogin">
+      <label class="cf-lbl">EMAIL</label>
+      <input class="cf-input" id="loginEmail" type="email" value="amrit@codeflow.dev" placeholder="you@example.com"/>
+      <label class="cf-lbl">PASSWORD</label>
+      <input class="cf-input" id="loginPw" type="password" value="••••••••" placeholder="Password"/>
+      <div class="auth-error" id="loginError" style="display:none"></div>
+      <button class="cf-btn primary full" id="loginBtn">Sign In →</button>
+      <div class="auth-demo">
+        <button class="demo-login" onclick="demoLogin()">Try Demo Account</button>
+      </div>
+    </div>
+    <div class="auth-form" id="formRegister" style="display:none">
+      <label class="cf-lbl">NAME</label>
+      <input class="cf-input" id="regName" type="text" placeholder="Your name"/>
+      <label class="cf-lbl">EMAIL</label>
+      <input class="cf-input" id="regEmail" type="email" placeholder="you@example.com"/>
+      <label class="cf-lbl">PASSWORD</label>
+      <input class="cf-input" id="regPw" type="password" placeholder="Min 8 characters"/>
+      <div class="auth-error" id="regError" style="display:none"></div>
+      <button class="cf-btn primary full" id="registerBtn">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="cf-app" id="cfApp" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="cf-sidebar">
+    <div class="sb-brand">
+      <span class="sb-logo">◈</span>
+      <span class="sb-name">CodeFlow</span>
+    </div>
+
+    <div class="sb-section-label">WORKSPACE</div>
+    <nav class="sb-nav">
+      <button class="sb-item active" data-view="board">
+        <span class="sb-icon">▦</span> Board
+      </button>
+      <button class="sb-item" data-view="backlog">
+        <span class="sb-icon">≡</span> Backlog
+      </button>
+      <button class="sb-item" data-view="activity">
+        <span class="sb-icon">◎</span> Activity
+      </button>
+      <button class="sb-item" data-view="settings">
+        <span class="sb-icon">⚙</span> Settings
+      </button>
+    </nav>
+
+    <div class="sb-section-label">PROJECTS</div>
+    <div class="project-list" id="projectList"></div>
+    <button class="add-project-btn" id="addProjectBtn">+ New Project</button>
+
+    <div class="sb-footer">
+      <div class="sb-user" id="sbUser"></div>
+      <button class="logout-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="cf-content">
+
+    <!-- Top bar -->
+    <header class="cf-topbar">
+      <div class="cf-topbar-left">
+        <h1 class="cf-project-title" id="cfProjectTitle">My Project</h1>
+        <div class="cf-sprint-badge" id="sprintBadge">Sprint 1</div>
+      </div>
+      <div class="cf-topbar-right">
+        <div class="cf-search-wrap">
+          <input class="cf-search" id="boardSearch" type="text" placeholder="Search tasks..."/>
+        </div>
+        <div class="filter-wrap">
+          <select class="cf-select" id="priorityFilter">
+            <option value="">All Priorities</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <button class="cf-btn primary" id="newTaskBtn">+ New Task</button>
+      </div>
+    </header>
+
+    <!-- BOARD VIEW -->
+    <div class="cf-view active" id="view-board">
+      <div class="kanban-board" id="kanbanBoard">
+        <div class="kanban-col" data-status="todo">
+          <div class="col-header">
+            <span class="col-title">To Do</span>
+            <span class="col-count" id="count-todo">0</span>
+          </div>
+          <div class="col-body" id="col-todo" ondragover="onDragOver(event)" ondrop="onDrop(event,'todo')"></div>
+          <button class="add-task-col" onclick="openNewTaskModal('todo')">+ Add Task</button>
+        </div>
+        <div class="kanban-col" data-status="inprogress">
+          <div class="col-header">
+            <span class="col-title">In Progress</span>
+            <span class="col-count" id="count-inprogress">0</span>
+          </div>
+          <div class="col-body" id="col-inprogress" ondragover="onDragOver(event)" ondrop="onDrop(event,'inprogress')"></div>
+          <button class="add-task-col" onclick="openNewTaskModal('inprogress')">+ Add Task</button>
+        </div>
+        <div class="kanban-col" data-status="review">
+          <div class="col-header">
+            <span class="col-title">In Review</span>
+            <span class="col-count" id="count-review">0</span>
+          </div>
+          <div class="col-body" id="col-review" ondragover="onDragOver(event)" ondrop="onDrop(event,'review')"></div>
+          <button class="add-task-col" onclick="openNewTaskModal('review')">+ Add Task</button>
+        </div>
+        <div class="kanban-col" data-status="done">
+          <div class="col-header">
+            <span class="col-title">Done ✓</span>
+            <span class="col-count" id="count-done">0</span>
+          </div>
+          <div class="col-body" id="col-done" ondragover="onDragOver(event)" ondrop="onDrop(event,'done')"></div>
+          <button class="add-task-col" onclick="openNewTaskModal('done')">+ Add Task</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BACKLOG VIEW -->
+    <div class="cf-view" id="view-backlog">
+      <div class="backlog-container">
+        <div class="backlog-header">
+          <h2 class="view-title">Product Backlog</h2>
+          <button class="cf-btn primary" onclick="openNewTaskModal('todo')">+ Add to Backlog</button>
+        </div>
+        <table class="backlog-table">
+          <thead><tr><th>#</th><th>Title</th><th>Status</th><th>Priority</th><th>Assignee</th><th>Tags</th><th>Actions</th></tr></thead>
+          <tbody id="backlogBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACTIVITY VIEW -->
+    <div class="cf-view" id="view-activity">
+      <div class="activity-container">
+        <h2 class="view-title">Activity Log</h2>
+        <div class="activity-feed" id="activityFeed"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="cf-view" id="view-settings">
+      <div class="settings-container">
+        <h2 class="view-title">Settings</h2>
+        <div class="settings-section">
+          <h3 class="settings-h3">Account</h3>
+          <label class="cf-lbl">DISPLAY NAME</label>
+          <input class="cf-input half" id="settingsName" type="text"/>
+          <label class="cf-lbl">EMAIL</label>
+          <input class="cf-input half" id="settingsEmail" type="email"/>
+          <button class="cf-btn primary" onclick="saveSettings()">Save Changes</button>
+        </div>
+        <div class="settings-section">
+          <h3 class="settings-h3">Danger Zone</h3>
+          <button class="cf-btn danger" onclick="clearAllData()">Clear All Data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-backdrop" id="taskModalBackdrop">
+  <div class="task-modal" id="taskModal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">New Task</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="cf-lbl">TITLE *</label>
+      <input class="cf-input" id="taskTitle" type="text" placeholder="Task title…"/>
+      <label class="cf-lbl">DESCRIPTION</label>
+      <textarea class="cf-textarea" id="taskDesc" rows="3" placeholder="Describe this task…"></textarea>
+      <div class="modal-row2">
+        <div>
+          <label class="cf-lbl">PRIORITY</label>
+          <select class="cf-input" id="taskPriority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+        <div>
+          <label class="cf-lbl">STATUS</label>
+          <select class="cf-input" id="taskStatus">
+            <option value="todo">To Do</option>
+            <option value="inprogress">In Progress</option>
+            <option value="review">In Review</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <div>
+          <label class="cf-lbl">DUE DATE</label>
+          <input class="cf-input" id="taskDue" type="date"/>
+        </div>
+      </div>
+      <label class="cf-lbl">TAGS (comma separated)</label>
+      <input class="cf-input" id="taskTags" type="text" placeholder="e.g. frontend, auth, bug…"/>
+      <label class="cf-lbl">ASSIGNEE</label>
+      <input class="cf-input" id="taskAssignee" type="text" placeholder="Name…"/>
+    </div>
+    <div class="modal-footer">
+      <button class="cf-btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="cf-btn danger" id="deleteTaskBtn" style="display:none" onclick="deleteCurrentTask()">Delete</button>
+      <button class="cf-btn primary" id="saveTaskBtn" onclick="saveTask()">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
