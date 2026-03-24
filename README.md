@@ -12,6 +12,8 @@
 
 </div>
 
+![CodeFlow Screenshot](screenshot.png)
+
 ---
 
 A fully functional Kanban-style project management application with JWT authentication simulation, real data persistence via `localStorage`, drag-and-drop, and an activity audit log. Built with vanilla HTML, CSS, and JavaScript — no frameworks, no build tools.
